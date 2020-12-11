@@ -1,2 +1,3 @@
-const fs = require('fs');
+const main = require('./classes/Main');
 
+main.start();
