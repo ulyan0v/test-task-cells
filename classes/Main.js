@@ -6,7 +6,7 @@ const Board = require('./Board');
 const rules = require('../rules');
 
 class Main {
-  interval = null;
+  _interval = null;
 
   constructor() {
     this.args = minimist(process.argv.slice(2), {
@@ -24,15 +24,15 @@ class Main {
   }
 
   start() {
-    this.interval = setInterval(() => {
-      Renderer.showInConsole(this.board.state)
+    this._interval = setInterval(() => {
+      Renderer.showInConsole(this.board.state);
 
-      this.board.tick()
+      this.board.tick();
     }, config.timeout);
   }
 
   stop() {
-    clearInterval(this.interval);
+    clearInterval(this._interval);
   }
 
   _loadMap(path) {

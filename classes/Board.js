@@ -2,20 +2,26 @@ const config = require('../config');
 const {random} = require('../utils');
 
 module.exports = class Board {
+  width;
+  height;
+  aliveCellsPercent;
+  _rules;
+  _cells;
+
   constructor(params = {}) {
     ({
-      cells: this.cells = [],
-      rules: this.rules = [],
+      cells: this._cells = [],
+      rules: this._rules = [],
       aliveCellsPercent: this.aliveCellsPercent = config.aliveCellsPercent,
-      width: this.width = this.cells[0]?.length || config.defaultWidth,
-      height: this.height = this.cells?.length || config.defaultHeight,
+      width: this.width = this._cells[0]?.length || config.defaultWidth,
+      height: this.height = this._cells?.length || config.defaultHeight,
     } = params);
 
-    if (!this.cells.length) this.cells = this._getRandomState();
+    if (!this._cells.length) this._cells = this._getRandomState();
   }
 
   get state() {
-    return this.cells;
+    return this._cells;
   }
 
   tick() {
@@ -26,7 +32,7 @@ module.exports = class Board {
 
       for (let x = 0; x < this.width; x++) {
         const isRulesComplete = this._checkRules(
-          this.cells[y][x],
+          this._cells[y][x],
           this._getNeighborsValue(y, x)
         );
 
@@ -35,7 +41,7 @@ module.exports = class Board {
       }
     }
 
-    this.cells = newState;
+    this._cells = newState;
   }
 
   _getNeighborsValue(cellY, cellX) {
@@ -43,9 +49,9 @@ module.exports = class Board {
 
     for (let y = cellY - 1; y <= cellY + 1; y++) {
       for (let x = cellX - 1; x <= cellX + 1; x++) {
-        if (this.cells[y] && this.cells[y][x]) {
+        if (this._cells[y] && this._cells[y][x]) {
           if (cellX === x && cellY === y) continue;
-          result += this.cells[y][x];
+          result += this._cells[y][x];
         }
       }
     }
@@ -54,9 +60,9 @@ module.exports = class Board {
   }
 
   _checkRules(cell, neighborsValue) {
-    if (!this.rules.length) return !!cell;
+    if (!this._rules.length) return !!cell;
 
-    return !this.rules.find(rule => {
+    return !this._rules.find(rule => {
       return !rule(cell, neighborsValue)
     });
   }
