@@ -1,45 +1,32 @@
-const config = require('../config');
-const {random} = require('../utils');
-
 module.exports = class Board {
-  width;
-  height;
-  aliveCellsPercent;
   _rules;
   _cells;
 
-  constructor(params = {}) {
-    ({
-      cells: this._cells = [],
-      rules: this._rules = [],
-      aliveCellsPercent: this.aliveCellsPercent = config.aliveCellsPercent,
-      width: this.width = this._cells[0]?.length || config.defaultWidth,
-      height: this.height = this._cells?.length || config.defaultHeight,
-    } = params);
-
-    if (!this._cells.length) this._cells = this._getRandomState();
+  constructor(cells, rules = []) {
+    this._cells = cells;
+    this._rules = rules;
   }
 
-  get state() {
+  getState() {
     return this._cells;
   }
 
   tick() {
     const newState = [];
 
-    for (let y = 0; y < this.height; y++) {
+    this._cells.forEach((row, y) => {
       newState.push([]);
 
-      for (let x = 0; x < this.width; x++) {
+      row.forEach((cell, x) => {
         const isRulesComplete = this._checkRules(
-          this._cells[y][x],
+          cell,
           this._getNeighborsValue(y, x)
         );
 
         if (isRulesComplete) newState[y][x] = 1;
         else newState[y][x] = 0;
-      }
-    }
+      });
+    });
 
     this._cells = newState;
   }
@@ -65,19 +52,5 @@ module.exports = class Board {
     return !this._rules.find(rule => {
       return !rule(cell, neighborsValue)
     });
-  }
-
-  _getRandomState() {
-    const result = [];
-
-    for (let y = 0; y < this.height; y++) {
-      result.push([]);
-
-      for (let x = 0; x < this.width; x++) {
-        result[y][x] = random(0, 100) > this.aliveCellsPercent ? 0 : 1;
-      }
-    }
-
-    return result;
   }
 }

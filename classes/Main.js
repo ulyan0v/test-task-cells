@@ -1,8 +1,8 @@
-const fs = require('fs');
 const minimist = require('minimist');
 const config = require('../config');
 const Renderer = require('./Renderer');
 const Board = require('./Board');
+const MapFile = require('./Map');
 const rules = require('../rules');
 
 class Main {
@@ -13,19 +13,18 @@ class Main {
       alias: {width: 'w', height: 'h'}
     });
 
-    const path = this.args._[0];
-
-    this.board = new Board({
-      cells: path ? this._loadMap(path) : undefined,
+    const map = new MapFile({
+      fileName: this.args._[0],
       width: this.args.width,
-      height: this.args.height,
-      rules
+      height: this.args.height
     });
+
+    this.board = new Board(map.getMap(), rules);
   }
 
   start() {
     this._interval = setInterval(() => {
-      Renderer.showInConsole(this.board.state);
+      Renderer.showInConsole(this.board.getState());
 
       this.board.tick();
     }, config.timeout);
@@ -33,19 +32,6 @@ class Main {
 
   stop() {
     clearInterval(this._interval);
-  }
-
-  _loadMap(path) {
-    return fs
-      .readFileSync(`maps/${path}`, 'utf-8')
-      .split('\n')
-      .map(row => {
-        return row
-          .split('')
-          // Number('\r') почему-то возвращает 0
-          .filter(cell => !isNaN(parseInt(cell)))
-          .map(cell => +cell);
-      });
   }
 }
 
