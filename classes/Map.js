@@ -24,13 +24,19 @@ module.exports = class MapFile {
     return this._map;
   }
 
-  validateMap() {
+  validateMap(map) {
+    let isValid = true;
 
+    map.sort((a, b) => {
+      if (a.length !== b.length) isValid = false;
+      return 0;
+    });
+
+    return isValid;
   }
 
-  _loadFile() {
-    this._map = fs
-      .readFileSync(`maps/${this._fileName}`, 'utf-8')
+  convertToMap(str) {
+    return str
       .split('\n')
       .map(row => {
         return row
@@ -39,6 +45,14 @@ module.exports = class MapFile {
           .filter(cell => !isNaN(parseInt(cell)))
           .map(cell => +cell);
       });
+  }
+
+  _loadFile() {
+    const file = fs.readFileSync(`maps/${this._fileName}`, 'utf-8');
+    const map = this.convertToMap(file);
+
+    if (this.validateMap(map)) this._map = map;
+    else throw new Error('Invalid Map');
   }
 
   _createRandomMap() {
